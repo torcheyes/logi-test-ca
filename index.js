@@ -34,6 +34,7 @@ const maintenance = (req, res) => {
   return res.status(400).json({error: 'This route is under maintenance'})
 }
 
+
 app.use( '/api', apiRoute )
 app.use( '/api/plinko', plinkoRoute )
 app.use( '/api/mines', minesRoute )

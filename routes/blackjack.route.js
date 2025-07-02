@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit')
 
 const { db } = require("../handler")
 const { authJwt } = require('../middlewares/authJwt')
-const { handleWinReport } = require('../helpers')
+const { handleWinReport, handleRaffleWager } = require('../helpers')
 
 const User = db.user
 const Game = db.game
@@ -431,9 +431,9 @@ router.post('/create-bet', authJwt, spamLimiter, async (req, res) => {
             delete spamCache.bet[userData.id]
             return res.status(400).json({ error: 'Minimum wager is 0.25$' })
         }
-        if ( Number(betAmount) > 25) {
+        if ( Number(betAmount) > 50) {
             delete spamCache.bet[userData.id]
-            return res.status(400).json({ error: 'Maximum wager is 25$' })
+            return res.status(400).json({ error: 'Maximum wager is 50$' })
         }
 
         const botUserPromise = User.findOne({ casinoBot: true, balance: { $gte: Number(betAmount) } }).select('balance').lean()
@@ -444,6 +444,8 @@ router.post('/create-bet', authJwt, spamLimiter, async (req, res) => {
         ).select('balance').lean()
         
         const [botUser, user] = await Promise.all([botUserPromise, updatedUserPromise])
+
+        handleRaffleWager(userData, betAmount)
 
         if (!user) {
             delete spamCache.bet[userData.id]

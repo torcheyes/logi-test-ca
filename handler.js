@@ -49,6 +49,25 @@ function loadDatabases() {
             default: Date.now
         }
     }))
+    const raffle = model(`raffle`, new Schema({
+        active: {
+            type: Boolean,
+            default: true
+        },
+        name: String,
+        winnersAmount: Number,
+        ticketAmount: Number,
+        prizeAmount: Number,
+        users: {
+            type: Object,
+            default: {}
+        },
+        expireAt: Date,
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }))
     const withdraw = model(`withdraw`, new Schema({
         userId: String,
         username: String,
@@ -95,7 +114,8 @@ function loadDatabases() {
         withdraw,
         provablyFair,
         game,
-        activeSeed
+        activeSeed,
+        raffle
     }
 }
 

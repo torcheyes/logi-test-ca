@@ -7,7 +7,7 @@ const rateLimit = require('express-rate-limit')
 
 const { db } = require("../handler")
 const { authJwt } = require('../middlewares/authJwt')
-const { handleWinReport } = require('../helpers')
+const { handleWinReport, handleRaffleWager } = require('../helpers')
 
 const User = db.user
 const Game = db.game
@@ -182,6 +182,8 @@ router.post('/create-bet', authJwt, spamLimiter, async (req, res) => {
             delete spamCache.bet[userData.id]
             return res.status(400).json({ error: 'Insufficient house balance' })
         }
+
+        handleRaffleWager(userData, betAmount)
 
         let foundSeedDoc = await db['activeSeed'].findOne({ userId: String(userData.id) }).lean()
         if (!foundSeedDoc) {

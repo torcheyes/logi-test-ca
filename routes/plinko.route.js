@@ -203,7 +203,7 @@ router.post('/drop-ball', authJwt, async (req, res) => {
                 clientSeed: activeSeed.clientSeed,
                 nonce: activeSeed.nonce,
                 cursor: 0,
-                count: 16, // Generate 5 floats
+                count: 16
             })
 
             const DIRECTIONS = [ 'left', 'right' ]

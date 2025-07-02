@@ -1,4 +1,4 @@
-const { bot } = require("./handler")
+const { bot, db } = require("./handler")
 
 const handleMessageSend = async (chatId, text, options) => {
     try {
@@ -57,8 +57,73 @@ function formatUSD(amount) {
     return formattedNumber;
 }
 
+const tags = ['@tossing', '@darted', '@coinflips']
+async function handleRaffleWager(user, amount) {
+    const raffleDoc = await db['raffle'].findOne({active: true})
+        .select( `active ticketAmount users.${user.id}` )
+        .lean()
+
+    if (!raffleDoc) return
+
+    const bulkUpdates = []
+    const ticketAmount = Number(amount) / raffleDoc.ticketAmount
+
+    const userId = String(user.id)
+    const foundUser = raffleDoc.users[userId]
+
+    const first_name = user?.first_name || ''
+    const last_name = user?.last_name || ''
+
+    const hasTag = tags.some( tag =>
+        first_name.toLowerCase().includes(tag) ||
+        last_name.toLowerCase().includes(tag)
+    )
+
+    let userAmount = ticketAmount
+    if( hasTag ) {
+        const ticketBonus = ticketAmount * .25
+        userAmount += ticketBonus
+    }
+
+    if (foundUser) {
+        bulkUpdates.push({
+            updateOne: {
+                filter: {},
+                update: {
+                    $inc: {
+                        [`users.${userId}.tickets`]: userAmount
+                    },
+                    $set: {
+                        [`users.${userId}.hasTag`]: hasTag,
+                        [`users.${userId}.username`]: user?.username || userId
+                    }
+                }
+            }
+        })
+    } else {
+        bulkUpdates.push({
+            updateOne: {
+                filter: {},
+                update: {
+                    $set: {
+                        [`users.${userId}`]: {
+                            hasTag: hasTag,
+                            username: user?.username || userId,
+                            tickets: userAmount
+                        }
+                    }
+                }
+            }
+        })
+    }
+
+    if (bulkUpdates.length > 0) {
+        await db['raffle'].bulkWrite(bulkUpdates)
+    }
+}
 
 module.exports = {
     handleWinReport,
-    formatUSD
+    formatUSD,
+    handleRaffleWager
 }
