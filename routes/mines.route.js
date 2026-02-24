@@ -7,7 +7,6 @@ const rateLimit = require('express-rate-limit')
 
 const { db } = require("../handler")
 const { authJwt } = require('../middlewares/authJwt')
-const { handleWinReport, handleRaffleWager } = require('../helpers')
 
 const User = db.user
 const Game = db.game
@@ -156,10 +155,10 @@ router.post('/create-bet', authJwt, spamLimiter, async (req, res) => {
             delete spamCache.bet[userData.id]
             return res.status(400).json({ error: 'Minimum wager is 0.25$' })
         }
-        if ( Number(betAmount) > 10) {
+        /*if ( Number(betAmount) > 10) {
             delete spamCache.bet[userData.id]
             return res.status(400).json({ error: 'Maximum wager is 10$' })
-        }
+        }*/
         if( isNaN(minesCount) || minesCount > 24 || minesCount < 1 ) {
             delete spamCache.bet[userData.id]
             return res.status(400).json({ error: 'Invalid request data' })
@@ -182,8 +181,6 @@ router.post('/create-bet', authJwt, spamLimiter, async (req, res) => {
             delete spamCache.bet[userData.id]
             return res.status(400).json({ error: 'Insufficient house balance' })
         }
-
-        handleRaffleWager(userData, betAmount)
 
         let foundSeedDoc = await db['activeSeed'].findOne({ userId: String(userData.id) }).lean()
         if (!foundSeedDoc) {
@@ -393,8 +390,6 @@ router.post('/next-move', authJwt, async (req, res) => {
 
                 handleNextInit(userData.id)
 
-                handleWinReport(userData, 'mines', foundGame.amount, fullPayout)
-
                 return res.status(200).json({
                     active: false,
                     _id: foundGame._id,
@@ -503,8 +498,6 @@ router.post('/bet-cashout', authJwt, spamLimiter, async (req, res) => {
     )
 
     await Promise.all([userPromise, gamePromise])
-
-    handleWinReport(userData, 'mines', foundGame.amount, fullPayout)
 
     delete spamCache.cashout[userData.id]
 

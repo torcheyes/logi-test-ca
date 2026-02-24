@@ -12,7 +12,7 @@ globalThis.plinkoCache = {}
 const { connectMongoose } = require("./handler")
 
 const corsOptions = {
-  "origin": ["http://localhost:3000"],
+  "origin": ["http://localhost:5173"],
   "methods": ['POST', 'PATCH', 'PUT', 'GET', 'OPTIONS', 'HEAD', 'DELETE'],
   "credentials": true,
   "preflightContinue": false,
@@ -25,21 +25,10 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 const apiRoute = require('./routes/api.route')
-const plinkoRoute = require('./routes/plinko.route')
 const minesRoute = require('./routes/mines.route')
-const blackjackRoute = require('./routes/blackjack.route')
-
-
-const maintenance = (req, res) => {
-  return res.status(400).json({error: 'This route is under maintenance'})
-}
-
 
 app.use( '/api', apiRoute )
-app.use( '/api/plinko', plinkoRoute )
 app.use( '/api/mines', minesRoute )
-app.use( '/api/blackjack', blackjackRoute )
-
 
 app.use(express.static(path.join(__dirname, 'build')))
 app.get('*', (req, res) => {

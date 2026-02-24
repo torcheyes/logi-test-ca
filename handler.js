@@ -1,8 +1,5 @@
-const TelegramBot = require('node-telegram-bot-api')
 const mongoose = require("mongoose")
 const { Schema, model } = require("mongoose")
-
-const bot = new TelegramBot(process.env?.TELE_TOKEN||process.env?.DEV_TELE_TOKEN, { polling: false })
 
 function loadDatabases() {
     const bot = model(`bot`, new Schema({
@@ -49,25 +46,6 @@ function loadDatabases() {
             default: Date.now
         }
     }))
-    const raffle = model(`raffle`, new Schema({
-        active: {
-            type: Boolean,
-            default: true
-        },
-        name: String,
-        winnersAmount: Number,
-        ticketAmount: Number,
-        prizeAmount: Number,
-        users: {
-            type: Object,
-            default: {}
-        },
-        expireAt: Date,
-        createdAt: {
-            type: Date,
-            default: Date.now
-        }
-    }))
     const withdraw = model(`withdraw`, new Schema({
         userId: String,
         username: String,
@@ -100,11 +78,6 @@ function loadDatabases() {
         totalLost: { type: Number, default: 0 },
         totalTie: { type: Number, default: 0 },
         clientSeed: String,
-        referral_id: String,
-        join_referral_id: String,
-        referral_earnings: { type: Number, default: 0 },
-        referral_invited: { type: Number, default: 0 },
-        referral_played: { type: Number, default: 0 },
         casinoBot: Boolean,
         appban: { type: Boolean, default: false }
     }))
@@ -114,8 +87,7 @@ function loadDatabases() {
         withdraw,
         provablyFair,
         game,
-        activeSeed,
-        raffle
+        activeSeed
     }
 }
 
@@ -140,6 +112,5 @@ const db = loadDatabases()
 
 module.exports = {
     db,
-    connectMongoose,
-    bot
+    connectMongoose
 }

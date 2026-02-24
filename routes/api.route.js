@@ -27,22 +27,6 @@ router.post('/user-state', stateAuthJwt, async(req, res) => {
 
   if(user?.appban) return res.status( 200 ).json({banned: true, error: 'You are banned from using the app.'})
 
-  let x_tokenHash
-  const foundUserHash = globalThis?.usersHashCache[String(userData.id)]
-  
-  if( foundUserHash && Date.now() < foundUserHash?.expires ) {
-    x_tokenHash = foundUserHash.token
-    foundUserHash.expires = Date.now() + (6*1000*60)
-  } else {
-    x_tokenHash = crypto.createHash('sha256').update(`${userData.id}-${Date.now()}`).digest('base64url')
-    globalThis.usersHashCache[String(userData.id)] = {
-      token: x_tokenHash,
-      expires: Date.now() + (6*1000*60)
-    }
-  }
-  
-  res.set('x-token', x_tokenHash)
-
   res.status(200).json({
     balance: user.balance
   })
