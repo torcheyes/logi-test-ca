@@ -12,7 +12,7 @@ globalThis.plinkoCache = {}
 const { connectMongoose } = require("./handler")
 
 const corsOptions = {
-  "origin": ["http://localhost:5173"],
+  "origin": ["http://localhost:5173", "https://logi-test-ca.onrender.com/"],
   "methods": ['POST', 'PATCH', 'PUT', 'GET', 'OPTIONS', 'HEAD', 'DELETE'],
   "credentials": true,
   "preflightContinue": false,
