@@ -125,7 +125,8 @@ router.post('/active-bet', authJwt, spamLimiter, async (req, res) => {
                 gameData: {
                     mines: null,
                     minesCount: foundGame.gameData.minesCount,
-                    rounds: foundGame.gameData.rounds
+                    rounds: foundGame.gameData.rounds,
+                    nextPayoutMultiplier: minesWinRates[foundGame.gameData.minesCount][foundGame.gameData.rounds.length+1]
                 }
             }
         })
@@ -203,7 +204,7 @@ router.post('/create-bet', authJwt, spamLimiter, async (req, res) => {
 
         await db['activeSeed'].updateOne({ _id: foundSeedDoc._id }, { nonce: foundSeedDoc.nonce })
 
-        const minesMap = createMinesweeperArray(minesCount, foundSeedDoc.serverSeed, foundSeedDoc.clientSeed, foundSeedDoc.nonce).array        
+        const minesMap = createMinesweeperArray(minesCount, foundSeedDoc.serverSeed, foundSeedDoc.clientSeed, foundSeedDoc.nonce).array 
 
         const gameId = generateRandomId(32)
         await Game.create({
@@ -234,7 +235,8 @@ router.post('/create-bet', authJwt, spamLimiter, async (req, res) => {
             gameData: {
                 mines: null,
                 minesCount,
-                rounds: []
+                rounds: [],
+                nextPayoutMultiplier: minesWinRates[minesCount][1]
             }
         })
     } catch ( err ) {
@@ -415,6 +417,7 @@ router.post('/next-move', authJwt, async (req, res) => {
             })
 
             handleNextInit(userData.id)
+            const nextPayout = minesWinRates[foundGame.gameData.minesCount][playedRounds+1]
 
             res.status(200).json({
                 active: true,
@@ -427,7 +430,8 @@ router.post('/next-move', authJwt, async (req, res) => {
                 gameData: {
                     mines: null,
                     minesCount: foundGame.gameData.minesCount,
-                    rounds: [...foundGame.gameData.rounds, ...newFields]
+                    rounds: [...foundGame.gameData.rounds, ...newFields],
+                    nextPayoutMultiplier: nextPayout
                 }
             })
         }
